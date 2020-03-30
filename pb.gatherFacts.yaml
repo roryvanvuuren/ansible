@@ -1,0 +1,32 @@
+---
+- name: pb.gatherfacts.yaml
+  gather_facts: false
+  #store_125:&vendor_cisco:&type_switch
+  hosts: store_lab:&router_1b
+  connection: local
+  serial: 20
+
+  vars:
+    cli:
+      host: "{{ inventory_hostname }}"
+      username: "{{ ansible_ssh_user }}"
+      password: "{{ ansible_ssh_pass }}"
+
+  tasks:
+   # - name: remove diff temp directory
+   #   file: path=./host_vars/{{inventory_hostname}}.yaml state=absent
+
+   # - name: create diff temp directory
+   #   file: path=./host_vars/ state=directory
+
+    - name: gather facts
+      ios_facts:
+        gather_subset: '!config'
+        gather_network_resources:
+          - l2_interfaces
+          - interfaces
+        provider: "{{ cli }}"
+
+    - name: debug
+      debug:
+        msg: "{{ saved.stdout_lines }}"
