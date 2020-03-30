@@ -1,0 +1,20 @@
+---
+- name: Get Device Facts
+  hosts: router_1b:!region_southwest:!region_southeast:!region_northeast:!region_northwest:!region_midwest:!region_canada
+  connection: local
+  gather_facts: no
+
+  vars:
+    ansible_ssh_user: "{{ junos_ssh_user }}"
+    ansible_ssh_pass: "{{ junos_ssh_pass }}"
+    ansible_network_os: junos
+
+  tasks:
+
+    - name: Gathering system storage data
+      junos_command:
+        commands:
+          - show system storage | match /var/tmp
+      register: output
+    - debug:
+        msg: "{{ output.stdout_lines }}"
