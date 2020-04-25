@@ -1,10 +1,10 @@
 ---
-- name: Updates Tunnel 901 on 1b routers to bring up a redundant tunnel to cr319-4z-new
-  gather_facts: false                                  # Will skip collecting facts and directly execute tasks listed.
-  hosts: region_canada:&router_1b                          # Hosts to be included in this change
-  connection: local                                    # Runs ansible locally
-  serial: 10                                           # How many hosts Ansible should manage at a single time
-  strategy: free                                       # Allows each host to run until the end of the play as fast as it can
+- name: Updates Tunnel backup routers to bring up a redundant tunnel to new headend
+  gather_facts: false                                                 # Will skip collecting facts and directly execute tasks listed.
+  hosts: <LIST ROUTERS>                                               # Hosts to be included in this change
+  connection: local                                                   # Runs ansible locally
+  serial: 10                                                          # How many hosts Ansible should manage at a single time
+  strategy: free                                                      # Allows each host to run until the end of the play as fast as it can
 
   vars_prompt:
     - name: username
@@ -24,22 +24,22 @@
 
 
   tasks:
-    - name: Update Tunnel 901                          # Name of task to be executed
-      ios_config:                                      # Cisco module
-        provider: "{{ cli }}"                          # A dict object containing connection details.
-        lines:                                         # The ordered set of commands that should be configured in the section
-           -  ip nhrp map 10.31.213.253 161.181.53.252 # New cr319-4z-new mapping
-           -  ip nhrp map multicast 161.181.53.252     # New cr319-4z-new mapping
-           -  ip nhrp nhs 10.31.213.253                # New cr319-4z-new mapping
-        parents: interface Tunnel 901                  # The ordered set of parents that uniquely identify the section or hierarchy the commands should be checked against
-      notify: "save ios"                               # Calls in the "save ios" handler and executes it.
-
-  handlers:                                            # Are triggered at the end of each block of tasks in a play, and will only be triggered once even if notified by multiple different tasks.
-    - name: save ios                                   # Name of the handler
-      ios_command:                                     # Cisco module
-        provider: "{{ cli }}"                          # A dict object containing connection details.
-        commands: "write mem"                          # Command to be executed when this handler is called
-      register: saved                                  # Captures the output of this task as a variable.
-      when: not ansible_check_mode                     # Boolean for skipping an error check during --check
-    - debug:                                           # This module prints statements during execution and can be useful for debugging variables or expressions without necessarily halting the playbook
-        msg: "{{ saved.stdout_lines }}"                # The customized message that is printed. If omitted, prints a generic message. This case, it prints out the variable, named "saved" from the output from the handler execution.
+    - name: Update Tunnel 901                                        # Name of task to be executed
+      ios_config:                                                    # Cisco module
+        provider: "{{ cli }}"                                        # A dict object containing connection details.
+        lines:                                                       # The ordered set of commands that should be configured in the section
+           -  ip nhrp map <New Tunnel interface IP> <New public IP>  # New headend mapping
+           -  ip nhrp map multicast <New public IP>                  # New headend mapping
+           -  ip nhrp nhs <New Tunnel interface IP>                  # New headend mapping
+        parents: interface Tunnel 901                                # The ordered set of parents that uniquely identify the section or hierarchy the commands should be checked against
+      notify: "save ios"                                             # Calls in the "save ios" handler and executes it.
+              
+  handlers:                                                          # Are triggered at the end of each block of tasks in a play, and will only be triggered once even if notified by multiple different tasks.
+    - name: save ios                                                 # Name of the handler
+      ios_command:                                                   # Cisco module
+        provider: "{{ cli }}"                                        # A dict object containing connection details.
+        commands: "write mem"                                        # Command to be executed when this handler is called
+      register: saved                                                # Captures the output of this task as a variable.
+      when: not ansible_check_mode                                   # Boolean for skipping an error check during --check
+    - debug:                                                         # This module prints statements during execution and can be useful for debugging variables or expressions without necessarily halting the playbook
+        msg: "{{ saved.stdout_lines }}"                              # The customized message that is printed. If omitted, prints a generic message. This case, it prints out the variable, named "saved" from the output from the handler execution.
