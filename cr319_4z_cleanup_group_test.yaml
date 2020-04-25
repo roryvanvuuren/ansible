@@ -1,7 +1,7 @@
 ---
-- name: Updates Tunnel 901 on 1b routers to remove old cr319-4z tunnel
+- name: Updates Tunnel on routers to remove old DMVPN tunnel
   gather_facts: false                                                        # Will skip collecting facts and directly execute tasks listed.
-  hosts: router_1b:!cr401-1b:!cr406-1b:!cr832-1b:!cr883-1b                                                # Hosts to be included in this change
+  hosts: <INSERT HOSTS>                                                      # Hosts to be included in this change
   connection: local                                                          # Runs ansible locally
   serial: 10                                                                 # How many hosts Ansible should manage at a single time
   strategy: free                                                             # Allows each host to run until the end of the play as fast as it can
@@ -33,9 +33,9 @@
       ios_config:                                                            # Cisco module
         provider: "{{ cli }}"                                                # A dict object containing connection details.
         lines:                                                               # The ordered set of commands that should be configured in the section
-           -  no ip nhrp map 10.31.212.1 161.181.48.20                       # Old cr319-4z mapping
-           -  no ip nhrp map multicast 161.181.48.20                         # Old cr319-4z mapping
-           -  no ip nhrp nhs 10.31.212.1                                     # Old cr319-4z mapping
+           -  no ip nhrp map 10.31.212.1 161.181.48.20                       # Old DMVPN Headend mapping
+           -  no ip nhrp map multicast 161.181.48.20                         # Old DMVPN Headend mapping
+           -  no ip nhrp nhs 10.31.212.1                                     # Old DMVPN Headend mapping
         parents: interface Tunnel 901                                        # The ordered set of parents that uniquely identify the section or hierarchy the commands should be checked against
       when: '"ip nhrp map 10.31.212.1 161.181.48.20" in ansible_net_config'  # When condition is met
       notify: "save ios"                                                     # Calls in the "save ios" handler and executes it.
